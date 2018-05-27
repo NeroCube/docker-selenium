@@ -11,9 +11,19 @@ def mockup_user():
     user['password'] = "mypassword"
     return user
 
-def mockup_headers(content_type="application/json", token):
+def mockup_headers(token, content_type="application/json", ):
     headers = {'Content-Type':content_type, 'Authorization': 'Token {}'.format(token)}
     return headers
+
+def mockup_payload():
+    lines = []
+    base_path = "./data"
+    file_name = "test_data.txt"
+    with open("{}/{}".format(base_path, file_name)) as file:
+        for line in file: 
+            line = line.strip()
+            lines.append(line)
+    return lines
 
 def mockup_configs():
     configs = {}
