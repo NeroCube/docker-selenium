@@ -10,37 +10,57 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import requests, unittest, time, re
+from requests.auth import HTTPBasicAuth
+import requests, unittest, json, time, re
 
 class UntitledTestCase(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Remote(
           command_executor='http://localhost:4444/wd/hub',
           desired_capabilities=DesiredCapabilities.CHROME)
-        self.driver.implicitly_wait(30)
+        self.driver.implicitly_wait(5)
         self.verificationErrors = []
         self.accept_next_alert = True
     
-    def test_login_test_case(self):
+    def post(self, payload, requests_url):
+        token = self.get_auth_token()
+        headers = tool.mockup_headers(token=token)
+        response = requests.post(requests_url, data=payload.encode('utf-8'), headers=headers)
+        return response.text
+    
+    def login_website():
         driver = self.driver
-        user = tool.get_user_info()
-        test_settings = tool.mockup_test_info()
-        file_path = tool.get_screenshot_file_path()
-        driver.get(test_settings["base_url"]+"login")
+        user = tool.mockup_user()
+        configs = tool.mockup_configs()
+        driver.get(configs["base_url"]+"login")
         driver.find_element_by_name("email").send_keys(user["email"])
         driver.find_element_by_name("password").send_keys(user["password"])
         driver.find_element_by_name("email").send_keys(Keys.ENTER)
-        
-        self.check_login_success(By.CLASS_NAME, test_settings["flag_login_success"])
-        
-        driver.save_screenshot(file_path)
-        
-        payload = tool.mockup_answer()[0]
-        headers = tool.mockup_headers()
-        response = requests.post(test_settings["api_url"], data=payload.encode('utf-8'), headers=headers)
-        print("response:{}".format(str(response.text)))
     
-    def check_login_success(self, how, what):
+    def get_auth_token(self):
+        user = tool.mockup_user()
+        configs = tool.mockup_configs()
+        response = requests.get(configs['auth_url'], auth=HTTPBasicAuth(user['email'], user['password']))
+        obj = json.loads(response.text)
+        return obj['results']['token']
+
+    def test_login_test_case(self):
+        waits = 3
+        user = tool.mockup_user()
+        configs = tool.mockup_configs()
+        # payload = tool.mockup_payload()
+        # requests_url = "requests_url"
+        # response = self.post(payload, requests_url)
+
+        driver = self.driver
+        driver.get(configs["base_url"]+"login")
+        driver.find_element_by_name("email").send_keys(user["email"])
+        driver.find_element_by_name("password").send_keys(user["password"])
+        driver.find_element_by_name("email").send_keys(Keys.ENTER)       
+        time.sleep(waits)
+        driver.save_screenshot(tool.get_screenshot_file_path(filename="login"))
+        
+    def check_element_load_finish(self, how, what):
         locator = (how, what)
         try:
             WebDriverWait(self.driver, 20, 0.5).until(EC.presence_of_element_located(locator))
