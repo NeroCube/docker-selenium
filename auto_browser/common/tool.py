@@ -22,7 +22,8 @@ def mockup_payload():
     with open("{}/{}".format(base_path, file_name)) as file:
         for line in file: 
             line = line.strip()
-            lines.append(line)
+            if not line is "":
+                lines.append(line)
     return lines
 
 def mockup_configs():
