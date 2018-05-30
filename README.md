@@ -5,3 +5,7 @@ Front end test automation in docker
 pip3 install -r requirements.txt
 python3 auto_browser/test.py
 ```
+## Remove all screenshot
+```
+rm -fr ./screenshot/*
+```
