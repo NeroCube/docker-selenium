@@ -1,4 +1,4 @@
-import datetime, requests, os
+import datetime, requests, json, os
 
 def get_screenshot_file_path(filename="screenshot", filetype="png"):
     base_path = "./screenshot"
@@ -34,3 +34,7 @@ def mockup_configs():
     configs['flag_login_success'] = "zEWidget-launcher"
     return configs
 
+def load_configs():
+    with open('./configs/configs.json') as file:
+        configs = json.load(file)
+    return configs
