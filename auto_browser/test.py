@@ -59,12 +59,25 @@ class UntitledTestCase(unittest.TestCase):
         driver.find_element_by_name("email").send_keys(Keys.ENTER)       
         time.sleep(waits)
         driver.save_screenshot(tool.get_screenshot_file_path(filename="login"))
-        
+    
+    def check_element_in_page(self, target):
+        start = time.time()
+        while True:
+            if target in self.driver.page_source:
+                time.sleep(0.5)
+                break
+            spend = time.time() -start
+            print('spend:{}'.format(spend))
+            if spend > 10:
+                raise  TimeoutException
+            time.sleep(0.5)
+
     def check_element_load_finish(self, how, what):
         locator = (how, what)
         try:
             WebDriverWait(self.driver, 20, 0.5).until(EC.presence_of_element_located(locator))
-        except TimeoutException as e: return False
+        except TimeoutException as e: 
+            return False
         return True
 
     def is_element_present(self, how, what):
